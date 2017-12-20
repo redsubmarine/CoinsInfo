@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "db": "docker-compose -f database.yml up",
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "node index.js",
     "server:dev": "nodemon index.js"
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/redsubmarine/CoinsInfo#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "mongodb": "^3.0.0-rc0",
     "request": "^2.83.0"
