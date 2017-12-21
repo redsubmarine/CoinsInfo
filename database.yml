@@ -1,8 +1,10 @@
 mongo:
-  image: mongo:3.6.0
+  image: mongo:3.4.2
   ports:
     - "27017:27017"
   command: mongod --noauth
+#  volumes:
+#    - ./data/mongo:/data/db
 #  environment:
 #    MONGODB_USER: "${db_user_env}"
 #    MONGODB_DATABASE: "${dbname_env}"
