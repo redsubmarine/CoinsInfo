@@ -33,22 +33,20 @@ MongoClient.connect(mongoUrl, (err, db) => {
         // setInterval(getAllInfo, 1000);
     });
 
-    function getAllInfo() {
-        Promise.all(
-            [
+    async function getAllInfo() {
+        try {
+            await Promise.all([
                 getCoinInfo(Coin.BitCoin),
                 getCoinInfo(Coin.BitCoinCash),
                 getCoinInfo(Coin.Ethereum),
                 getCoinInfo(Coin.Ripple),
-            ]
-        ).then(() => {
-            console.log('', 'Done');
-            setTimeout(getAllInfo, 1000);
-        }).catch(err => { 
-            console.error('Error: ', err);
-            setTimeout(getAllInfo, 10000); 
-        })
-
+            ])
+            console.log('', 'Done')
+            setTimeout(getAllInfo, 1000)
+        } catch (ex) {
+            console.error('Error: ', ex);
+            setTimeout(getAllInfo, 10000);
+        }
     }
 
     function getCoinInfo(coin) {
