@@ -1,5 +1,3 @@
-// import { setTimeout } from 'timers';
-
 const express = require('express');
 const request = require('request');
 const MongoClient = require('mongodb').MongoClient;
@@ -20,17 +18,39 @@ MongoClient.connect(mongoUrl, (err, db) => {
         "Ripple": "Ripple",
     };
 
-    app.get('/coins', (req, res) => {
+    app.get('/coins/all', (req, res) => {
         col.find({ updatedAt: { $gte: Date.now() - (1000 * 60 * 60 * 24) } }, { "_id": false, "name": true, "price": true, "updatedAt": true }).toArray().then(rows => {
-            // rows.forEach(row => console.log('', row))
             res.json(rows);
         })
+    });
+
+    function getCoin(type, lastUpdatedAt, res) {
+        const updatedAt = lastUpdatedAt ? Math.max(lastUpdatedAt, Date.now() - (1000 * 60 * 60 * 24)) : Date.now() - (1000 * 60 * 60 * 24)
+        col.find({ name: type, updatedAt: { $gte: updatedAt } }, { "_id": false, "name": true, "price": true, "updatedAt": true }).toArray().then(rows => {
+            const data = { data: rows, updatedAt: Date.now() }
+            res.json(data);
+        })
+    }
+
+    app.get('/coins/bitcoin', (req, res) => {
+        getCoin(Coin.BitCoin, req.query.lastUpdatedAt, res)
+    });
+
+    app.get('/coins/bitcoincash', (req, res) => {
+        getCoin(Coin.BitCoinCash, req.query.lastUpdatedAt, res)
+    });
+
+    app.get('/coins/ethereum', (req, res) => {
+        getCoin(Coin.Ethereum, req.query.lastUpdatedAt, res)
+    });
+
+    app.get('/coins/ripple', (req, res) => {
+        getCoin(Coin.Ripple, req.query.lastUpdatedAt, res)
     });
 
     app.listen(3000, () => {
         console.log('Server start on port 3000!.');
         getAllInfo();
-        // setInterval(getAllInfo, 1000);
     });
 
     async function getAllInfo() {
@@ -41,10 +61,10 @@ MongoClient.connect(mongoUrl, (err, db) => {
                 getCoinInfo(Coin.Ethereum),
                 getCoinInfo(Coin.Ripple),
             ])
-            console.log('', 'Done')
+            console.log('', 'Info Saved')
             setTimeout(getAllInfo, 1000)
         } catch (ex) {
-            console.error('Error: ', ex);
+            console.error('Error:', ex);
             setTimeout(getAllInfo, 10000);
         }
     }
@@ -85,9 +105,7 @@ MongoClient.connect(mongoUrl, (err, db) => {
                     col.insert(insObj)//.then(r => console.log(r)).catch(e => console.log("error:", e))
                         .then(() => resolve())
                 } else {
-                    // console.log("currency api error: " + error)
-                    console.log("status ", response.statusCode)
-                    reject('ERROR')
+                    reject(response.statusCode == 429 ? "TooMany" : "Error")
                 }
             });
         })
